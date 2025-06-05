@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function App() {
-  const [email, setEmail] = useState('');
+  const [confirmarSenha, setconfirmarSenha] = useState('');
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState('');
   const navigate = useNavigate();
@@ -12,12 +12,16 @@ function App() {
     e.preventDefault();
 
     try {
-      const resposta = await fetch(`${import.meta.env.VITE_API_URL}/usuarios/login`, {
-        method: 'POST',
+      if (senha !== confirmarSenha) {
+        setMensagem('❌ As senhas não coincidem!');
+        return;
+      }
+      const resposta = await fetch(`${import.meta.env.VITE_API_URL}/usuarios/reset-senha`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, senha }),
+        body: JSON.stringify({ confirmarSenha, senha }),
       });
 
       if (!resposta.ok) {
@@ -26,9 +30,8 @@ function App() {
       }
 
       const dados = await resposta.json();
-      setMensagem(`✅ Login realizado com sucesso! Bem-vindo(a), ${dados.nome}!`);
+      setMensagem(`✅ Senha alterada com sucesso! Bem-vindo(a), ${dados.nome}!`);
     } catch (err) {
-      console.error('entrou aq', err);
       setMensagem(`❌ Erro: ${err.message}`);
     }
   };
@@ -36,15 +39,15 @@ function App() {
   return (
     <div style={{ padding: '2rem' }} className='container'>
       <div className='centro'>
-        <h2>Login</h2>
+        <h2>Redefinir Senha</h2>
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }} className='login'>
-            <label>Email:
+            <label>confirmarSenha:
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Digite seu email"
+                type="password"
+                value={confirmarSenha}
+                onChange={(e) => setconfirmarSenha(e.target.value)}
+                placeholder="Digite sua senha"
                 required
                 style={{ marginLeft: '1rem' }}
               />
@@ -57,7 +60,7 @@ function App() {
                 type="password"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-                placeholder="Digite sua senha"
+                placeholder="Confirme sua senha"
                 required
                 style={{ marginLeft: '1rem' }}
               />
